@@ -180,7 +180,10 @@ public class CustomerLandingActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_signout) {
+            // Firebase sign out
+            AuthUI.getInstance().signOut(this);
+            mQrCodeView.setImageResource(R.drawable.placeholder);
 
         } else if (id == R.id.nav_share) {
 
@@ -197,7 +200,6 @@ public class CustomerLandingActivity extends AppCompatActivity
     private void onSignedInInitialise(FirebaseUser user){
         // Get Firebase User ID
         mUserID = user.getUid();
-
 
         TextView idView = (TextView) findViewById(R.id.idView);
         idView.setText(mUserID);
