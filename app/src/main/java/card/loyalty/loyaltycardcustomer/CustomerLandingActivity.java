@@ -36,6 +36,8 @@ public class CustomerLandingActivity extends AppCompatActivity
 
     private static final String TAG = "CustomerLandingActivity";
     private static final int RC_SIGN_IN = 123;
+    // Firebase UID extra for launching MyCards activity
+    public static final String EXTRA_FIREBASE_UID = "FIREBASE_UID";
 
     // QR Code
     private ImageView mQrCodeView;
@@ -174,8 +176,8 @@ public class CustomerLandingActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
+        if (id == R.id.nav_myCards) {
+            launchMyCardsActivity();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -219,5 +221,14 @@ public class CustomerLandingActivity extends AppCompatActivity
     // On signing out clean up any user specific data here. For example detatch database event listener
     private void onSignedOutCleanup() {
 
+    }
+
+    // Launch the MyCards activity
+    private void launchMyCardsActivity() {
+        String Uid = mFirebaseAuth.getCurrentUser().getUid();
+
+        Intent intent = new Intent(this, MyCardsActivity.class);
+        intent.putExtra(EXTRA_FIREBASE_UID, Uid);
+        startActivity(intent);
     }
 }
