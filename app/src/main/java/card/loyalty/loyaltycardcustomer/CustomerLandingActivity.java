@@ -98,7 +98,7 @@ public class CustomerLandingActivity extends AppCompatActivity
                                     .createSignInIntentBuilder()
                                     .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                                    //.setTheme(R.style.AuthTheme) //set a theme for Firebase UI here
+                                    //.setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
                                     .build(),
                             RC_SIGN_IN);
                 }
@@ -159,7 +159,7 @@ public class CustomerLandingActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // as you specify bizName parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement

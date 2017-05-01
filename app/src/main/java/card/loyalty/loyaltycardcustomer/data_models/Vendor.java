@@ -7,8 +7,8 @@ package card.loyalty.loyaltycardcustomer.data_models;
 public class Vendor {
 
     // Public fields for Firebase interaction
-    public String name;
-    public String address;
+    public String businessName;
+//    public String address;
 
     private String vendorID;
 

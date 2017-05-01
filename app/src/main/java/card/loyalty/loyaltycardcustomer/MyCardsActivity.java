@@ -22,6 +22,14 @@ import java.util.List;
 
 import card.loyalty.loyaltycardcustomer.adapters.LoyaltyCardsRecyclerAdapter;
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyCard;
+import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
+import card.loyalty.loyaltycardcustomer.data_models.Vendor;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function3;
+import io.reactivex.schedulers.Schedulers;
 
 public class MyCardsActivity extends AppCompatActivity {
 
@@ -81,8 +89,14 @@ public class MyCardsActivity extends AppCompatActivity {
         };
     }
 
-    // Database listener for recylcer view
-    private void attachDatabaseReadListener() {
+    private void detachDatabaseReadListener() {
+        if (mValueEventListener != null) {
+            mQuery.removeEventListener(mValueEventListener);
+            mValueEventListener = null;
+        }
+    }
+
+    private void attachObservableDatabaseListener() {
         mQuery = mLoyaltyCardsRef.orderByChild("customerID").equalTo(mFirebaseAuth.getCurrentUser().getUid());
 
         if (mValueEventListener == null) {
@@ -92,14 +106,38 @@ public class MyCardsActivity extends AppCompatActivity {
                     if (dataSnapshot.exists()) {
                         Log.d(TAG, "onDataChange: data change detected");
                         mCards.clear();
-                        for (DataSnapshot cardSnapshot: dataSnapshot.getChildren()) {
+                        for (DataSnapshot cardSnapshot : dataSnapshot.getChildren()) {
                             LoyaltyCard card = cardSnapshot.getValue(LoyaltyCard.class);
                             card.setCardID(cardSnapshot.getKey());
                             mCards.add(card);
                         }
-                        mRecyclerAdapter.setCards(mCards);
+
+                        Observable.fromIterable(mCards)
+                                .observeOn(Schedulers.io())
+                                .concatMap(loyaltyCard -> {
+                                    Observable<String> biz = getBizName(loyaltyCard.vendorID);
+                                    Observable<String> off = getOfferDesc(loyaltyCard.offerID);
+                                    Observable<LoyaltyCard> card = Observable.just(loyaltyCard);
+                                    Function3 function31 = new Function3<String, String, LoyaltyCard, LoyaltyCard>() {
+                                        @Override
+                                        public LoyaltyCard apply(@io.reactivex.annotations.NonNull String bizName, @io.reactivex.annotations.NonNull String offDesc, @io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
+                                            loyaltyCard.setBusinessName(bizName);
+                                            loyaltyCard.setOfferDescription(offDesc);
+                                            return loyaltyCard;
+                                        }
+                                    };
+                                    Observable<LoyaltyCard> observable = Observable.zip(biz, off, card, function31);
+                                    return observable;
+                                })
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .doOnComplete(() -> {
+                                    mRecyclerAdapter.setCards(mCards);
+                                })
+                                .subscribe();
+
                     }
                 }
+
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
                     Log.d(TAG, "onCancelled: database error occurred. Details: " + databaseError.getDetails() + ", Message: " + databaseError.getMessage());
@@ -108,12 +146,63 @@ public class MyCardsActivity extends AppCompatActivity {
         }
         mQuery.addValueEventListener(mValueEventListener);
     }
-    private void detachDatabaseReadListener() {
-        if (mValueEventListener != null) {
-            mQuery.removeEventListener(mValueEventListener);
-            mValueEventListener = null;
-        }
+
+    private Observable<String> getBizName(String vendorID) {
+        return Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(@io.reactivex.annotations.NonNull ObservableEmitter<String> e) throws Exception {
+                Query query = mVendorsRef.orderByKey().equalTo(vendorID);
+                ValueEventListener listener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot vendorSnapshot : dataSnapshot.getChildren()) {
+                                Vendor vendor = vendorSnapshot.getValue(Vendor.class);
+                                e.onNext(vendor.businessName);
+                                e.onComplete();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getMessage());
+                    }
+                };
+                query.addListenerForSingleValueEvent(listener);
+            }
+        });
     }
+
+
+    private Observable<String> getOfferDesc(String offerID) {
+        return Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(@io.reactivex.annotations.NonNull ObservableEmitter<String> e) throws Exception {
+                Query query = mLoyaltyOffersRef.orderByKey().equalTo(offerID);
+                ValueEventListener listener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot offerSnapshot : dataSnapshot.getChildren()) {
+                                LoyaltyOffer offer = offerSnapshot.getValue(LoyaltyOffer.class);
+                                String bn = (offer.description != null) ? offer.description : "Vendor";
+                                e.onNext(bn);
+                                e.onComplete();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getMessage());
+                    }
+                };
+                query.addListenerForSingleValueEvent(listener);
+            }
+        });
+    }
+
 
     @Override
     protected void onResume() {
@@ -132,7 +221,7 @@ public class MyCardsActivity extends AppCompatActivity {
     }
 
     private void onSignedInItitailise(FirebaseUser user) {
-        attachDatabaseReadListener();
+        attachObservableDatabaseListener();
         Log.d(TAG, "onSignedInItitailise: MyCardsActivity, UID = " + mFirebaseAuth.getCurrentUser().getUid());
     }
 

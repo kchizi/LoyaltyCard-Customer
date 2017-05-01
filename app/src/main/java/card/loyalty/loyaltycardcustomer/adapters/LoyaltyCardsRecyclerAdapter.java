@@ -40,8 +40,8 @@ public class LoyaltyCardsRecyclerAdapter extends RecyclerView.Adapter<LoyaltyCar
     @Override
     public void onBindViewHolder(LoyaltyCardViewHolder holder, int position) {
         LoyaltyCard card = mCards.get(position);
-        holder.businessName.setText("Placeholder Business Name");
-        holder.offerDescription.setText("Placeholder Offer Description");
+        holder.businessName.setText(card.retrieveBusinessName());
+        holder.offerDescription.setText(card.retrieveOfferDescription());
         holder.purchaseCount.setText("Purchases: " + card.purchaseCount);
     }
 
