@@ -24,9 +24,8 @@ import card.loyalty.loyaltycardcustomer.adapters.LoyaltyCardsRecyclerAdapter;
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyCard;
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
 import card.loyalty.loyaltycardcustomer.data_models.Vendor;
+import card.loyalty.loyaltycardcustomer.observables.RxFirebase;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function3;
 import io.reactivex.schedulers.Schedulers;
@@ -44,9 +43,7 @@ public class MyCardsActivity extends AppCompatActivity {
 
     // Firebase Database
     private DatabaseReference mRootRef;
-    private DatabaseReference mLoyaltyOffersRef;
     private DatabaseReference mLoyaltyCardsRef;
-    private DatabaseReference mVendorsRef;
     private ValueEventListener mValueEventListener;
     private Query mQuery;
 
@@ -60,9 +57,7 @@ public class MyCardsActivity extends AppCompatActivity {
         // Firebase initialisations
         mFirebaseAuth = FirebaseAuth.getInstance();
         mRootRef = FirebaseDatabase.getInstance().getReference();
-        mLoyaltyOffersRef = mRootRef.child("LoyaltyOffers");
         mLoyaltyCardsRef = mRootRef.child("LoyaltyCards");
-        mVendorsRef = mRootRef.child("Vendors");
 
         // Initialise cards list
         mCards = new ArrayList<>();
@@ -82,6 +77,7 @@ public class MyCardsActivity extends AppCompatActivity {
                 if (user != null) {
                     onSignedInItitailise(user);
                 } else {
+                    onSignedOutCleanup();
                     Intent intent = new Intent(MyCardsActivity.this, CustomerLandingActivity.class);
                     startActivity(intent);
                 }
@@ -112,25 +108,29 @@ public class MyCardsActivity extends AppCompatActivity {
                             mCards.add(card);
                         }
 
+                        // Create an observable stream from the cards retrieved
                         Observable.fromIterable(mCards)
                                 .observeOn(Schedulers.io())
                                 .concatMap(loyaltyCard -> {
-                                    Observable<String> biz = getBizName(loyaltyCard.vendorID);
-                                    Observable<String> off = getOfferDesc(loyaltyCard.offerID);
+                                    // create two new streams to get the vendor and offer
+                                    Observable<Vendor> ven = RxFirebase.getVendor(mRootRef, loyaltyCard.vendorID);
+                                    Observable<LoyaltyOffer> off = RxFirebase.getLoyaltyOffer(mRootRef, loyaltyCard.offerID);
                                     Observable<LoyaltyCard> card = Observable.just(loyaltyCard);
-                                    Function3 function31 = new Function3<String, String, LoyaltyCard, LoyaltyCard>() {
+                                    Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard> f = new Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard>() {
                                         @Override
-                                        public LoyaltyCard apply(@io.reactivex.annotations.NonNull String bizName, @io.reactivex.annotations.NonNull String offDesc, @io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
-                                            loyaltyCard.setBusinessName(bizName);
-                                            loyaltyCard.setOfferDescription(offDesc);
+                                        public LoyaltyCard apply(@io.reactivex.annotations.NonNull Vendor vendor, @io.reactivex.annotations.NonNull LoyaltyOffer offer, @io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
+                                            loyaltyCard.setBusinessName(vendor.businessName);
+                                            loyaltyCard.setOfferDescription(offer.description);
                                             return loyaltyCard;
                                         }
                                     };
-                                    Observable<LoyaltyCard> observable = Observable.zip(biz, off, card, function31);
+                                    // zip the two observable streams together and returns a new observable
+                                    Observable<LoyaltyCard> observable = Observable.zip(ven, off, card, f);
                                     return observable;
                                 })
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .doOnComplete(() -> {
+                                    // set the cards to the recycler adapter
                                     mRecyclerAdapter.setCards(mCards);
                                 })
                                 .subscribe();
@@ -145,62 +145,6 @@ public class MyCardsActivity extends AppCompatActivity {
             };
         }
         mQuery.addValueEventListener(mValueEventListener);
-    }
-
-    private Observable<String> getBizName(String vendorID) {
-        return Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull ObservableEmitter<String> e) throws Exception {
-                Query query = mVendorsRef.orderByKey().equalTo(vendorID);
-                ValueEventListener listener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot vendorSnapshot : dataSnapshot.getChildren()) {
-                                Vendor vendor = vendorSnapshot.getValue(Vendor.class);
-                                e.onNext(vendor.businessName);
-                                e.onComplete();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getMessage());
-                    }
-                };
-                query.addListenerForSingleValueEvent(listener);
-            }
-        });
-    }
-
-
-    private Observable<String> getOfferDesc(String offerID) {
-        return Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(@io.reactivex.annotations.NonNull ObservableEmitter<String> e) throws Exception {
-                Query query = mLoyaltyOffersRef.orderByKey().equalTo(offerID);
-                ValueEventListener listener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot offerSnapshot : dataSnapshot.getChildren()) {
-                                LoyaltyOffer offer = offerSnapshot.getValue(LoyaltyOffer.class);
-                                String bn = (offer.description != null) ? offer.description : "Vendor";
-                                e.onNext(bn);
-                                e.onComplete();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getMessage());
-                    }
-                };
-                query.addListenerForSingleValueEvent(listener);
-            }
-        });
     }
 
 
@@ -222,7 +166,7 @@ public class MyCardsActivity extends AppCompatActivity {
 
     private void onSignedInItitailise(FirebaseUser user) {
         attachObservableDatabaseListener();
-        Log.d(TAG, "onSignedInItitailise: MyCardsActivity, UID = " + mFirebaseAuth.getCurrentUser().getUid());
+        Log.d(TAG, "onSignedInItitailise: MyCardsActivity, UID = " + user.getUid());
     }
 
     private void onSignedOutCleanup() {
