@@ -19,8 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MyCardsActivity"></activity>
-        <activity android:name=".DetailedCardViewActivity"></activity>
+        <activity android:name=".MyCardsActivity" />
+        <activity android:name=".DetailedCardViewActivity" />
+        <activity android:name=".TestsActivity"></activity>
     </application>
 
 </manifest>

@@ -187,7 +187,10 @@ public class CustomerLandingActivity extends AppCompatActivity
             AuthUI.getInstance().signOut(this);
             mQrCodeView.setImageResource(R.drawable.placeholder);
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_test) {
+            // tests activity
+            Intent intent = new Intent(this, TestsActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_send) {
 
