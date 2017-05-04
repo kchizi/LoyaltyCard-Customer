@@ -14,6 +14,10 @@ public class Vendor {
 
     public Vendor() {}
 
+    public Vendor(String businessName) {
+        this.businessName = businessName;
+    }
+
     public String retrieveVendorID() {
         return vendorID;
     }
