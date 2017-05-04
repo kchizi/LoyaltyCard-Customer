@@ -26,7 +26,10 @@ import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
 import card.loyalty.loyaltycardcustomer.data_models.Vendor;
 import card.loyalty.loyaltycardcustomer.observables.RxFirebase;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Function;
 import io.reactivex.functions.Function3;
 import io.reactivex.schedulers.Schedulers;
 
@@ -111,27 +114,33 @@ public class MyCardsActivity extends AppCompatActivity {
                         // Create an observable stream from the cards retrieved
                         Observable.fromIterable(mCards)
                                 .observeOn(Schedulers.io())
-                                .concatMap(loyaltyCard -> {
-                                    // create two new streams to get the vendor and offer
-                                    Observable<Vendor> ven = RxFirebase.getVendor(mRootRef, loyaltyCard.vendorID);
-                                    Observable<LoyaltyOffer> off = RxFirebase.getLoyaltyOffer(mRootRef, loyaltyCard.offerID);
-                                    Observable<LoyaltyCard> card = Observable.just(loyaltyCard);
-                                    Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard> f = new Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard>() {
-                                        @Override
-                                        public LoyaltyCard apply(@io.reactivex.annotations.NonNull Vendor vendor, @io.reactivex.annotations.NonNull LoyaltyOffer offer, @io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
-                                            loyaltyCard.setBusinessName(vendor.businessName);
-                                            loyaltyCard.setOfferDescription(offer.description);
-                                            return loyaltyCard;
-                                        }
-                                    };
-                                    // zip the two observable streams together and returns a new observable
-                                    Observable<LoyaltyCard> observable = Observable.zip(ven, off, card, f);
-                                    return observable;
+                                .concatMap(new Function<LoyaltyCard, ObservableSource<?>>() {
+                                    @Override
+                                    public ObservableSource<?> apply(@io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
+                                        // create two new streams to get the vendor and offer
+                                        Observable<Vendor> ven = RxFirebase.getVendor(mRootRef, loyaltyCard.vendorID);
+                                        Observable<LoyaltyOffer> off = RxFirebase.getLoyaltyOffer(mRootRef, loyaltyCard.offerID);
+                                        Observable<LoyaltyCard> card = Observable.just(loyaltyCard);
+                                        Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard> f = new Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard>() {
+                                            @Override
+                                            public LoyaltyCard apply(@io.reactivex.annotations.NonNull Vendor vendor, @io.reactivex.annotations.NonNull LoyaltyOffer offer, @io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
+                                                loyaltyCard.setBusinessName(vendor.businessName);
+                                                loyaltyCard.setOfferDescription(offer.description);
+                                                return loyaltyCard;
+                                            }
+                                        };
+                                        // zip the two observable streams together and returns a new observable
+                                        Observable<LoyaltyCard> observable = Observable.zip(ven, off, card, f);
+                                        return observable;
+                                    }
                                 })
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .doOnComplete(() -> {
-                                    // set the cards to the recycler adapter
-                                    mRecyclerAdapter.setCards(mCards);
+                                .doOnComplete(new Action() {
+                                    @Override
+                                    public void run() throws Exception {
+                                        // set the cards to the recycler adapter
+                                        mRecyclerAdapter.setCards(mCards);
+                                    }
                                 })
                                 .subscribe();
 

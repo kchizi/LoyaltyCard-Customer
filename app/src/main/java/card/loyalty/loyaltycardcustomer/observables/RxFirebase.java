@@ -29,10 +29,10 @@ public class RxFirebase {
      * @param offerID The Key of the LoyaltyOffer to retrieve
      * @return LoyaltyOffer
      */
-    public static Observable<LoyaltyOffer> getLoyaltyOffer(DatabaseReference ref, String offerID) {
+    public static Observable<LoyaltyOffer> getLoyaltyOffer(final DatabaseReference ref, final String offerID) {
         return Observable.create(new ObservableOnSubscribe<LoyaltyOffer>() {
             @Override
-            public void subscribe(@io.reactivex.annotations.NonNull ObservableEmitter<LoyaltyOffer> e) throws Exception {
+            public void subscribe(@io.reactivex.annotations.NonNull final ObservableEmitter<LoyaltyOffer> e) throws Exception {
                 DatabaseReference lRef = ref.child("LoyaltyOffers");
                 Query query = lRef.orderByKey().equalTo(offerID);
                 ValueEventListener listener = new ValueEventListener() {
@@ -63,10 +63,10 @@ public class RxFirebase {
      * @param vendorID The Key of the Vendor to retrieve
      * @return LoyaltyOffer
      */
-    public static Observable<Vendor> getVendor(DatabaseReference ref, String vendorID) {
+    public static Observable<Vendor> getVendor(final DatabaseReference ref, final String vendorID) {
         return Observable.create(new ObservableOnSubscribe<Vendor>() {
             @Override
-            public void subscribe(@io.reactivex.annotations.NonNull ObservableEmitter<Vendor> e) throws Exception {
+            public void subscribe(@io.reactivex.annotations.NonNull final ObservableEmitter<Vendor> e) throws Exception {
                 DatabaseReference vRef = ref.child("Vendors");
                 Query query = vRef.orderByKey().equalTo(vendorID);
                 ValueEventListener listener = new ValueEventListener() {
