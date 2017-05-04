@@ -29,6 +29,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Function3;
 import io.reactivex.schedulers.Schedulers;
@@ -133,7 +134,13 @@ public class MyCardsActivity extends AppCompatActivity {
                                         Observable<LoyaltyCard> observable = Observable.zip(ven, off, card, f);
                                         return observable;
                                     }
-                                })
+                                }).retry(3)
+                                .doOnError(new Consumer<Throwable>() {
+                                    @Override
+                                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
+                                        Log.d(TAG, "MyCardsActivity: Observable from iterable: " + throwable.getMessage());
+                                    }
+                                }).onErrorReturnItem(new LoyaltyCard())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .doOnComplete(new Action() {
                                     @Override
