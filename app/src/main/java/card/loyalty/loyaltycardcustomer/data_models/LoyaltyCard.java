@@ -26,9 +26,30 @@ public class LoyaltyCard {
     private String offerDescription;
     private String businessName;
 
+    private Vendor vendor;
+    private LoyaltyOffer offer;
+
     public LoyaltyCard() {};
 
     // retrievers instead of getters so Firebase won't have access
+
+
+    public Vendor retrieveVendor() {
+        return vendor;
+    }
+
+    public void setVendor(Vendor vendor) {
+        this.vendor = vendor;
+    }
+
+    public LoyaltyOffer retrieveOffer() {
+        return offer;
+    }
+
+    public void setOffer(LoyaltyOffer offer) {
+        this.offer = offer;
+    }
+
     public String retrieveCardID() {
         return cardID;
     }

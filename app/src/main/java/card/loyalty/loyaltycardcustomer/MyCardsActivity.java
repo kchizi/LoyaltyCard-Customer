@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,9 +35,12 @@ import io.reactivex.functions.Function;
 import io.reactivex.functions.Function3;
 import io.reactivex.schedulers.Schedulers;
 
-public class MyCardsActivity extends AppCompatActivity {
+public class MyCardsActivity extends AppCompatActivity implements MyCardsClickListener.OnMyCardsClickListener {
 
     private static final String TAG = "MyCardsActivity";
+
+    // Extra key for storing the card clicked to pass to new activity/fragment
+    public static final String EXTRA_CARD_ID = "CardIdForDetailedView";
 
     // Adapter for recycler view
     private LoyaltyCardsRecyclerAdapter mRecyclerAdapter;
@@ -69,6 +73,9 @@ public class MyCardsActivity extends AppCompatActivity {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_myCards);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Add click listener
+        recyclerView.addOnItemTouchListener(new MyCardsClickListener(this, recyclerView, this));
+
         mRecyclerAdapter = new LoyaltyCardsRecyclerAdapter(mCards);
         recyclerView.setAdapter(mRecyclerAdapter);
 
@@ -79,7 +86,7 @@ public class MyCardsActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    onSignedInItitailise(user);
+                    onSignedInInitailise(user);
                 } else {
                     onSignedOutCleanup();
                     Intent intent = new Intent(MyCardsActivity.this, CustomerLandingActivity.class);
@@ -180,12 +187,23 @@ public class MyCardsActivity extends AppCompatActivity {
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
     }
 
-    private void onSignedInItitailise(FirebaseUser user) {
+    private void onSignedInInitailise(FirebaseUser user) {
         attachObservableDatabaseListener();
-        Log.d(TAG, "onSignedInItitailise: MyCardsActivity, UID = " + user.getUid());
+        Log.d(TAG, "onSignedInIitailise: MyCardsActivity, UID = " + user.getUid());
     }
 
     private void onSignedOutCleanup() {
         detachDatabaseReadListener();
     }
+
+
+    // When card is clicked
+    @Override
+    public void onClick(View view, int position) {
+        Log.d(TAG, "onClick: starts");
+        Intent intent = new Intent(this, DetailedCardViewActivity.class);
+        intent.putExtra(EXTRA_CARD_ID, mCards.get(position).retrieveCardID());
+        startActivity(intent);
+    }
+
 }
