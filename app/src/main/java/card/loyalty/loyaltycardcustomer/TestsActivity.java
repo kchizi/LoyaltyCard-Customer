@@ -231,7 +231,7 @@ public class TestsActivity extends AppCompatActivity {
         return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
             public void subscribe(@NonNull final ObservableEmitter<Boolean> e) throws Exception {
-                Vendor vendor = new Vendor("Test Business");
+                Vendor vendor = new Vendor("Test Business","test");
                 DatabaseReference ref = mTestsReference.child("Vendors");
                 ref.child("TestKey").setValue(vendor, new DatabaseReference.CompletionListener() {
                     @Override

@@ -66,8 +66,11 @@ public class DetailedCardViewActivity extends AppCompatActivity {
                                     Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard> f = new Function3<Vendor, LoyaltyOffer, LoyaltyCard, LoyaltyCard>() {
                                         @Override
                                         public LoyaltyCard apply(@io.reactivex.annotations.NonNull Vendor vendor, @io.reactivex.annotations.NonNull LoyaltyOffer offer, @io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
+                                            Log.d(TAG, "applying offer/vendor");
+
                                             loyaltyCard.setVendor(vendor);
                                             loyaltyCard.setOffer(offer);
+
                                             return loyaltyCard;
                                         }
                                     };
@@ -87,6 +90,7 @@ public class DetailedCardViewActivity extends AppCompatActivity {
                                 @Override
                                 public void run() throws Exception {
                                     // set the cards to the recycler adapter
+                                    Log.d(TAG,"doOnComplete filling card details");
                                     fillCardDetails();
                                 }
                             })
@@ -103,6 +107,7 @@ public class DetailedCardViewActivity extends AppCompatActivity {
         query.addListenerForSingleValueEvent(listener);
     }
 
+
     private void fillCardDetails() {
         TextView businessName = (TextView) findViewById(R.id.detail_bizName);
         TextView businessAddress = (TextView) findViewById(R.id.detail_bizAddr);
@@ -115,7 +120,7 @@ public class DetailedCardViewActivity extends AppCompatActivity {
         TextView rewardsClaimed = (TextView) findViewById(R.id.detail_rewardsClaimed);
 
         businessName.setText(mCard.retrieveVendor().businessName);
-        businessAddress.setText("TODO");
+        businessAddress.setText(mCard.retrieveVendor().businessAddress);
         offerDescription.setText(mCard.retrieveOffer().description);
         purchasesPerReward.setText("Purchases Per Reward: " + mCard.retrieveOffer().purchasesPerReward);
         reward.setText("Reward: " + mCard.retrieveOffer().reward);
