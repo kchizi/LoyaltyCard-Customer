@@ -6,7 +6,7 @@ import org.junit.Test;
 import card.loyalty.loyaltycardcustomer.TestsActivity;
 
 /**
- * Example local unit test, which will execute on the development machine (host).
+ * For testing that the vendor received was the vendor created
  *
  * @see <bizName href="http://d.android.com/tools/testing">Testing documentation</bizName>
  */

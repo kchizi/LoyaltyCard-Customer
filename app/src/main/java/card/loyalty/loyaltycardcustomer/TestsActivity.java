@@ -163,6 +163,7 @@ public class TestsActivity extends AppCompatActivity {
             }
         });
 
+        // Tests whether a vendor is created
         createTestVendor().subscribe(new Consumer<Boolean>() {
             @Override
             public void accept(@NonNull Boolean aBoolean) throws Exception {
@@ -189,6 +190,7 @@ public class TestsActivity extends AppCompatActivity {
      */
     private void postTests() {
 
+        // tests whether the offer is removed
         removeTestOffer().subscribe(new Consumer<Boolean>() {
             @Override
             public void accept(@NonNull Boolean aBoolean) throws Exception {
@@ -206,6 +208,7 @@ public class TestsActivity extends AppCompatActivity {
             }
         });
 
+        // tests whether the vendor is removed
         removeTestVendor().subscribe(new Consumer<Boolean>() {
             @Override
             public void accept(@NonNull Boolean aBoolean) throws Exception {
