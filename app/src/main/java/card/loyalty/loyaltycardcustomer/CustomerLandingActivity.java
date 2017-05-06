@@ -1,6 +1,7 @@
 package card.loyalty.loyaltycardcustomer;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -15,11 +16,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 import java.util.Arrays;
 
@@ -28,6 +36,14 @@ public class CustomerLandingActivity extends AppCompatActivity
 
     private static final String TAG = "CustomerLandingActivity";
     private static final int RC_SIGN_IN = 123;
+    // Firebase UID extra for launching MyCards activity
+    public static final String EXTRA_FIREBASE_UID = "FIREBASE_UID";
+
+    // QR Code
+    private ImageView mQrCodeView;
+
+    // Firebase User ID
+    private String mUserID;
 
     // Firebase Authentication Variables
     private FirebaseAuth mFirebaseAuth;
@@ -61,6 +77,9 @@ public class CustomerLandingActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        // Get image view for qr code
+        mQrCodeView = (ImageView) findViewById(R.id.imgview_qr);
+
         // Firebase UI Authentication
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -79,7 +98,7 @@ public class CustomerLandingActivity extends AppCompatActivity
                                     .createSignInIntentBuilder()
                                     .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                                    //.setTheme(R.style.AuthTheme) //set a theme for Firebase UI here
+                                    //.setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
                                     .build(),
                             RC_SIGN_IN);
                 }
@@ -140,7 +159,7 @@ public class CustomerLandingActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // as you specify bizName parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -157,15 +176,21 @@ public class CustomerLandingActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
+        if (id == R.id.nav_myCards) {
+            launchMyCardsActivity();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_signout) {
+            // Firebase sign out
+            AuthUI.getInstance().signOut(this);
+            mQrCodeView.setImageResource(R.drawable.placeholder);
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_test) {
+            // tests activity
+            Intent intent = new Intent(this, TestsActivity.class);
+            startActivity(intent);
 
         } else if (id == R.id.nav_send) {
 
@@ -178,11 +203,35 @@ public class CustomerLandingActivity extends AppCompatActivity
 
     // Once signed in initialise QR code and set any other user specific data here. For example attach database event listener here
     private void onSignedInInitialise(FirebaseUser user){
+        // Get Firebase User ID
+        mUserID = user.getUid();
 
+        TextView idView = (TextView) findViewById(R.id.idView);
+        idView.setText(mUserID);
+
+        // Set ImageView to QR Code
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try {
+            BitMatrix bitMatrix = multiFormatWriter.encode(mUserID, BarcodeFormat.QR_CODE, 400, 400);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+            mQrCodeView.setImageBitmap(bitmap);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
     }
 
     // On signing out clean up any user specific data here. For example detatch database event listener
     private void onSignedOutCleanup() {
 
+    }
+
+    // Launch the MyCards activity
+    private void launchMyCardsActivity() {
+        String Uid = mFirebaseAuth.getCurrentUser().getUid();
+
+        Intent intent = new Intent(this, MyCardsActivity.class);
+        intent.putExtra(EXTRA_FIREBASE_UID, Uid);
+        startActivity(intent);
     }
 }
