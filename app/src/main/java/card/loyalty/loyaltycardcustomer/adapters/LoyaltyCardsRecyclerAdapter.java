@@ -12,6 +12,8 @@ import card.loyalty.loyaltycardcustomer.R;
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyCard;
 
 /**
+ * RecyclerView Adapter for the LoyaltyCards Recycler on the starting activity. This follows the standard
+ * structure for a recycler adapter
  * Created by Sam on 26/04/2017.
  */
 
@@ -31,7 +33,6 @@ public class LoyaltyCardsRecyclerAdapter extends RecyclerView.Adapter<LoyaltyCar
 
     @Override
     public LoyaltyCardViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // TODO finish onCreateViewHolder
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.loyalty_card_list_item, parent, false);
         LoyaltyCardViewHolder holder = new LoyaltyCardViewHolder(view);
         return  holder;
@@ -55,7 +56,6 @@ public class LoyaltyCardsRecyclerAdapter extends RecyclerView.Adapter<LoyaltyCar
     }
 
     static class LoyaltyCardViewHolder extends RecyclerView.ViewHolder {
-        // TODO finish view holder
         TextView businessName = null;
         TextView offerDescription = null;
         TextView purchaseCount = null;

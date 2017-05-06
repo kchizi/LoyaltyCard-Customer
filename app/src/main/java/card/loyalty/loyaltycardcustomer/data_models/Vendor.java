@@ -9,7 +9,6 @@ public class Vendor {
     // Public fields for Firebase interaction
     public String businessName;
     public String businessAddress;
-//    public String address;
 
     private String vendorID;
 
