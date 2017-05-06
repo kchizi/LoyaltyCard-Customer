@@ -67,7 +67,7 @@ public class RxFirebase {
         return Observable.create(new ObservableOnSubscribe<Vendor>() {
             @Override
             public void subscribe(@io.reactivex.annotations.NonNull final ObservableEmitter<Vendor> e) throws Exception {
-                DatabaseReference vRef = ref.child("Vendor");
+                DatabaseReference vRef = ref.child("Vendors");
                 Query query = vRef.orderByKey().equalTo(vendorID);
                 ValueEventListener listener = new ValueEventListener() {
                     @Override

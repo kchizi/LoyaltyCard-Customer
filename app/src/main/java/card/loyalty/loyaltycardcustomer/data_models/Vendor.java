@@ -40,7 +40,6 @@ public class Vendor {
     public String getBusinessName() {
         return businessName;
     }
-
     }
 
 
