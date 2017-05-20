@@ -1,4 +1,4 @@
-package card.loyalty.loyaltycardcustomer;
+package card.loyalty.loyaltycardcustomer.fragments;
 
 import android.content.Context;
 import android.support.v4.view.GestureDetectorCompat;
@@ -12,17 +12,17 @@ import android.view.View;
  * Created by Sam on 5/05/2017.
  */
 
-public class MyCardsClickListener extends RecyclerView.SimpleOnItemTouchListener {
-    private static final String TAG = "MyCardsClickListener";
+public class CardsRecyclerClickListener extends RecyclerView.SimpleOnItemTouchListener {
+    private static final String TAG = "CardsRecyclerClickLis";
 
-    interface OnMyCardsClickListener {
+    public interface OnCardsRecyclerClickListener {
         void onClick(View view, int position);
     }
 
-    private final OnMyCardsClickListener mListener;
+    private final OnCardsRecyclerClickListener mListener;
     private final GestureDetectorCompat mGestureDetector;
 
-    public MyCardsClickListener(Context context, final RecyclerView recyclerView, OnMyCardsClickListener listener) {
+    public CardsRecyclerClickListener(Context context, final RecyclerView recyclerView, OnCardsRecyclerClickListener listener) {
         mListener = listener;
         mGestureDetector = new GestureDetectorCompat(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
