@@ -1,21 +1,30 @@
 package card.loyalty.loyaltycardcustomer.fragments;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import card.loyalty.loyaltycardcustomer.R;
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyCard;
@@ -28,24 +37,26 @@ import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function3;
 
+import static com.facebook.FacebookSdk.getApplicationContext;
+
 /**
  * Created by Sam on 20/05/2017.
  */
 
-public class CardDetailsFragment extends Fragment{
+public class CardDetailsFragment extends Fragment {
 
     private static final String TAG = "CardDetailsFragment";
 
     // The database key of the card to view
     private String mKey;
-
     // the card currently being viewed
     private LoyaltyCard mCard;
-
-
     // Firebase root database reference
     private DatabaseReference mRootRef;
 
+    private StorageReference mStorage;
+
+    private FirebaseAuth mFirebaseAuth;
 
     // Gets a new instance and passes it the database key of the card to view
     public static Fragment newInstance(String key) {
@@ -63,6 +74,8 @@ public class CardDetailsFragment extends Fragment{
         super.onCreate(savedInstanceState);
 
         mKey = getArguments().getString("Key");
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mStorage = FirebaseStorage.getInstance().getReference();
     }
 
     @Nullable
@@ -75,12 +88,14 @@ public class CardDetailsFragment extends Fragment{
         DatabaseReference cardsReference = FirebaseDatabase.getInstance().getReference().child("LoyaltyCards");
         mRootRef = FirebaseDatabase.getInstance().getReference();
 
+        // Create a reference with an initial file path and name
+
         Query query = cardsReference.orderByKey().equalTo(mKey);
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    for (DataSnapshot cardSnapshot: dataSnapshot.getChildren()) {
+                    for (DataSnapshot cardSnapshot : dataSnapshot.getChildren()) {
                         mCard = cardSnapshot.getValue(LoyaltyCard.class);
                         mCard.setCardID(cardSnapshot.getKey());
                     }
@@ -130,7 +145,7 @@ public class CardDetailsFragment extends Fragment{
                     @Override
                     public void run() throws Exception {
                         // set the cards to the recycler adapter
-                        Log.d(TAG,"doOnComplete filling card details");
+                        Log.d(TAG, "doOnComplete filling card details");
                         fillCardDetails(loyaltyCard);
                     }
                 })
@@ -151,6 +166,21 @@ public class CardDetailsFragment extends Fragment{
         TextView purchasesToNextReward = (TextView) activity.findViewById(R.id.detail_purchToNext);
         TextView rewardsIssued = (TextView) activity.findViewById(R.id.detail_rewardsIssued);
         TextView rewardsClaimed = (TextView) activity.findViewById(R.id.detail_rewardsClaimed);
+        final ImageView imageView = (ImageView) activity.findViewById(R.id.imageView);
+        final ImageView imageView2 = (ImageView) activity.findViewById(R.id.product_image);
+
+        mStorage.child("Images/" +card.offerID.toString()+ "/" +card.vendorID.toString()+ "/").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(getApplicationContext()).load(uri).into(imageView2);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+            }
+        });
 
         businessName.setText(card.retrieveVendor().businessName);
         businessAddress.setText(card.retrieveVendor().businessAddress);
@@ -165,7 +195,9 @@ public class CardDetailsFragment extends Fragment{
         rewardsIssued.setText("Rewards Issued: " + (pc / ppr));
         rewardsClaimed.setText("TODO");
 
+
         // TODO fix up the logic that calculates purchases to next reward so that it gets the number from the database
 
     }
+
 }

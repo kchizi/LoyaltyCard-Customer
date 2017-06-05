@@ -1,6 +1,5 @@
 package card.loyalty.loyaltycardcustomer.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -41,6 +40,8 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Function3;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by Sam on 20/05/2017.
@@ -193,6 +194,7 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
                             public LoyaltyCard apply(@io.reactivex.annotations.NonNull Vendor vendor, @io.reactivex.annotations.NonNull LoyaltyOffer offer, @io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
                                 loyaltyCard.setBusinessName(vendor.businessName);
                                 loyaltyCard.setOfferDescription(offer.description);
+
                                 return loyaltyCard;
                             }
                         };
@@ -223,6 +225,7 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
                         // set the cards to the recycler adapter
                         mCards = cards;  // TODO check valid
                         mRecyclerAdapter.setCards(mCards);
+
                     }
                 })
                 .subscribe();
