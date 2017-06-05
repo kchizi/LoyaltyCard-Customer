@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,6 +71,9 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
 
     private List<LoyaltyCard> mCards;
 
+    // ProgressBar
+    private ProgressBar spinner;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +104,10 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
         // create recycler adapter and set as adapter for cards recycler
         mRecyclerAdapter = new LoyaltyCardsRecyclerAdapter(mCards);
         recyclerView.setAdapter(mRecyclerAdapter);
+
+        spinner = (ProgressBar)view.findViewById(R.id.card_spinner);
+        spinner.setVisibility(View.VISIBLE);
+
 
 
         // Firebase Auth confirmation
@@ -223,9 +231,11 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
                         // set the cards to the recycler adapter
                         mCards = cards;  // TODO check valid
                         mRecyclerAdapter.setCards(mCards);
+                        spinner.setVisibility(View.GONE);
                     }
                 })
                 .subscribe();
+                spinner.setVisibility(View.GONE);
     }
 
     @Override

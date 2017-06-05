@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -142,6 +143,9 @@ public class CardDetailsFragment extends Fragment{
 
         Activity activity = getActivity();
 
+        ProgressBar spinner = (ProgressBar) activity.findViewById(R.id.detail_spinner);
+
+
         TextView businessName = (TextView) activity.findViewById(R.id.detail_bizName);
         TextView businessAddress = (TextView) activity.findViewById(R.id.detail_bizAddr);
         TextView offerDescription = (TextView) activity.findViewById(R.id.detail_offerDesc);
@@ -151,6 +155,8 @@ public class CardDetailsFragment extends Fragment{
         TextView purchasesToNextReward = (TextView) activity.findViewById(R.id.detail_purchToNext);
         TextView rewardsIssued = (TextView) activity.findViewById(R.id.detail_rewardsIssued);
         TextView rewardsClaimed = (TextView) activity.findViewById(R.id.detail_rewardsClaimed);
+
+        spinner.setVisibility(View.VISIBLE);
 
         businessName.setText(card.retrieveVendor().businessName);
         businessAddress.setText(card.retrieveVendor().businessAddress);
@@ -164,6 +170,8 @@ public class CardDetailsFragment extends Fragment{
         purchasesToNextReward.setText("Purchases to Next Reward: " + ptnr);
         rewardsIssued.setText("Rewards Issued: " + (pc / ppr));
         rewardsClaimed.setText("TODO");
+
+        spinner.setVisibility(View.GONE);
 
         // TODO fix up the logic that calculates purchases to next reward so that it gets the number from the database
 
