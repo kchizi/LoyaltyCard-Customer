@@ -14,7 +14,9 @@ import android.view.MenuItem;
 
 import com.firebase.ui.auth.AuthUI;
 
+import card.loyalty.loyaltycardcustomer.adapters.PromotionsRecyclerAdapter;
 import card.loyalty.loyaltycardcustomer.fragments.CardsRecyclerFragment;
+import card.loyalty.loyaltycardcustomer.fragments.PromotionsFragment;
 import card.loyalty.loyaltycardcustomer.fragments.QrFragment;
 
 public class CustomerActivity extends AppCompatActivity
@@ -100,7 +102,14 @@ public class CustomerActivity extends AppCompatActivity
                 current = new CardsRecyclerFragment();
             }
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_promotions) {
+
+            tag = PromotionsFragment.FRAGMENT_TAG;
+            current = manager.findFragmentByTag(tag);
+            if (current == null) {
+                // create if doesn't exist
+                current = new PromotionsFragment();
+            }
 
         } else if (id == R.id.nav_signout) {
             // Firebase sign out

@@ -91,4 +91,7 @@ public class RxFirebase {
         });
     }
 
+
+    // TODO create observable to get promotions (possibly)
+
 }
