@@ -38,6 +38,8 @@ public class CustomerActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+        // TODO check if launched from notification with Extra describing fragment to launch
+
         // Set QrFragment as the initial fragment
         if (savedInstanceState == null) {
             Fragment frag = new QrFragment();
