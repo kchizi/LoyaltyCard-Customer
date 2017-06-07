@@ -12,6 +12,9 @@ public class Promotion {
     public String expiryDate;
     public String vendorId;
 
+    // Stores the vendor
+    private Vendor vendor;
+
     // default constructor required for Firebase
     public Promotion(){}
 
@@ -21,6 +24,14 @@ public class Promotion {
         this.creationDate = creationDate;
         this.expiryDate = expiryDate;
         this.vendorId = vendorId;
+    }
+
+    public void setVendor(Vendor vendor) {
+        this.vendor = vendor;
+    }
+
+    public Vendor retrieveVendor() {
+        return this.vendor;
     }
 
 }

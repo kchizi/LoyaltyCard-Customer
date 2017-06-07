@@ -17,7 +17,7 @@ import card.loyalty.loyaltycardcustomer.data_models.Promotion;
  */
 
 public class PromotionsRecyclerAdapter extends RecyclerView.Adapter<PromotionsRecyclerAdapter.PromotionsViewHolder> {
-
+    private static final String TAG = "PromotionsRecyclerAdapt";
 
     private List<Promotion> mPromotions;
 
@@ -42,9 +42,14 @@ public class PromotionsRecyclerAdapter extends RecyclerView.Adapter<PromotionsRe
         Promotion promotion = mPromotions.get(position);
         holder.promoTitle.setText(promotion.title);
         holder.promoDescription.setText(promotion.description);
-        // TODO fix this...the promotion needs to include the vendors details...maybe do this in the cloud function
-        holder.promoVendorName.setText(promotion.vendorId);
-        holder.promoVendorAddress.setText(promotion.vendorId);
+
+        if (promotion.retrieveVendor() != null) {
+            holder.promoVendorName.setText(promotion.retrieveVendor().businessName);
+            holder.promoVendorAddress.setText(promotion.retrieveVendor().businessAddress);
+        } else {
+            holder.promoVendorName.setText("");
+            holder.promoVendorAddress.setText("");
+        }
         holder.promoExpiry.setText(promotion.expiryDate);
     }
 

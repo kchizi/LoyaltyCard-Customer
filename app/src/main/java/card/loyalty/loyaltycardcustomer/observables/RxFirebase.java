@@ -9,6 +9,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
+import card.loyalty.loyaltycardcustomer.data_models.Promotion;
 import card.loyalty.loyaltycardcustomer.data_models.Vendor;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -91,7 +92,32 @@ public class RxFirebase {
         });
     }
 
+    public static Observable<Promotion> getPromotion(final DatabaseReference ref, final String promoID) {
+        return Observable.create(new ObservableOnSubscribe<Promotion>() {
+            @Override
+            public void subscribe(@io.reactivex.annotations.NonNull final ObservableEmitter<Promotion> e) throws Exception {
+                DatabaseReference pRef = ref.child("Promotions");
+                Query query = pRef.orderByKey().equalTo(promoID);
+                ValueEventListener listener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot vendorSnapshot : dataSnapshot.getChildren()) {
+                                Promotion promo = vendorSnapshot.getValue(Promotion.class);
+                                e.onNext(promo);
+                                e.onComplete();
+                            }
+                        }
+                    }
 
-    // TODO create observable to get promotions (possibly)
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getMessage());
+                    }
+                };
+                query.addListenerForSingleValueEvent(listener);
+            }
+        });
+    }
 
 }
