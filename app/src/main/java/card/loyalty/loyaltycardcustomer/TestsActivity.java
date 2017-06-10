@@ -422,6 +422,7 @@ public class TestsActivity extends AppCompatActivity {
                             File downloadFile = File.createTempFile("returnFile", "test");
                             mDownloadContent = downloadFile;
                             Log.d(TAG, "downloadFile content: "+mDownloadContent);
+                            mStorageReference.child("Test").delete();
 
                         } catch (IOException e1) {
                             e1.printStackTrace();
