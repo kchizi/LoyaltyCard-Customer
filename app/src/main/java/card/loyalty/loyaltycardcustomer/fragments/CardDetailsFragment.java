@@ -172,13 +172,13 @@ public class CardDetailsFragment extends Fragment {
         mStorage.child("Images/" +card.offerID.toString()+ "/" +card.vendorID.toString()+ "/").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
-                Glide.with(getApplicationContext()).load(uri).into(imageView2);
+                Glide.with(getApplicationContext()).load(uri).override(100,100).error(R.drawable.placeholder).into(imageView2);
 
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
+                Glide.with(getApplicationContext()).load(R.drawable.placeholder).override(100,100).into(imageView2);
             }
         });
 
