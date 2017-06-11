@@ -22,6 +22,7 @@
             android:id="@+id/nav_signout"
             android:icon="@drawable/logout1"
             android:title="Sign Out"/>
+
     </group>
 
     <item android:title="Developer">
