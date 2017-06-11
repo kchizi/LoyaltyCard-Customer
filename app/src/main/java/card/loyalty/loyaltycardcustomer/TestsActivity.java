@@ -23,12 +23,15 @@ import java.io.File;
 import java.io.IOException;
 
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
+import card.loyalty.loyaltycardcustomer.data_models.Promotion;
 import card.loyalty.loyaltycardcustomer.data_models.Vendor;
 import card.loyalty.loyaltycardcustomer.observables.RxFirebase;
 import card.loyalty.loyaltycardcustomer.tests.TestA;
 import card.loyalty.loyaltycardcustomer.tests.TestB;
 import card.loyalty.loyaltycardcustomer.tests.TestC;
+import card.loyalty.loyaltycardcustomer.tests.TestD;
 import card.loyalty.loyaltycardcustomer.tests.TestLoyatlyOffer;
+import card.loyalty.loyaltycardcustomer.tests.TestPromotion;
 import card.loyalty.loyaltycardcustomer.tests.TestVendor;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -44,9 +47,9 @@ public class TestsActivity extends AppCompatActivity {
     private static StorageReference mStorageReference;
 
     // Total number of tests including setup tests and teardown tests
-    private static final int NUMBER_OF_TESTS = 8;
-    private static final int NUMBER_OF_SETUP_TESTS = 3;
-    private static final int NUMBER_OF_TEARDOWN_TESTS = 3;
+    private static final int NUMBER_OF_TESTS = 11;
+    private static final int NUMBER_OF_SETUP_TESTS = 4;
+    private static final int NUMBER_OF_TEARDOWN_TESTS = 4;
 
     // Total number of successful tests so far
     private static int mTestsSuccessful;
@@ -61,8 +64,10 @@ public class TestsActivity extends AppCompatActivity {
     public static Boolean mTestA_Passed;
     public static Boolean mTestB_Passed;
     public static Boolean mTestC_Passed;
+    public static Boolean mTestD_Passed;
     public static LoyaltyOffer mOfferReturned;
     public static Vendor mVendorReturned;
+    public static Promotion mPromotionReturned;
     public static File mUploadContent;
     public static File mDownloadContent;
 
@@ -147,6 +152,28 @@ public class TestsActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Test RxFirebase getPromotion
+        RxFirebase.getPromotion(mTestsReference, "TestKey").subscribe(new Consumer<Promotion>() {
+            @Override
+            public void accept(@NonNull Promotion promotion) throws Exception {
+                mPromotionReturned = promotion;
+
+                JUnitCore core = new JUnitCore();
+                Result result = core.run(TestPromotion.class);
+                Log.d(TAG, "tests() getPromotion successful: " + result.wasSuccessful());
+
+                if (result.wasSuccessful()) {
+                    mTestsSuccessful++;
+                    updateView();
+
+                    mMainTestsDone++;
+                    if (mMainTestsDone == (NUMBER_OF_TESTS - NUMBER_OF_SETUP_TESTS - NUMBER_OF_TEARDOWN_TESTS)) postTests();
+                } else {
+                    testFailed();
+                }
+            }
+        });
     }
 
     /**
@@ -219,6 +246,27 @@ public class TestsActivity extends AppCompatActivity {
             }
         });
 
+        // Tests whether a promotion is created
+        createTestPromotion().subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(@NonNull Boolean aBoolean) throws Exception {
+                mTestD_Passed = aBoolean;
+                JUnitCore core = new JUnitCore();
+                Result result = core.run(TestD.class);
+                Log.d(TAG, "preTests() partD successful: " + result.wasSuccessful());
+
+                if (result.wasSuccessful()) {
+                    mTestsSuccessful++;
+                    updateView();
+
+                    mSetupTestsDone++;
+                    if (mSetupTestsDone == NUMBER_OF_SETUP_TESTS) tests();
+                } else {
+                    testFailed();
+                }
+            }
+        });
+
 }
 
     /**
@@ -279,11 +327,29 @@ public class TestsActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // Tests whether the promotion is removed
+        removeTestPromotion().subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(@NonNull Boolean aBoolean) throws Exception {
+                mTestD_Passed = aBoolean;
+                JUnitCore core = new JUnitCore();
+                Result result = core.run(TestD.class);
+                Log.d(TAG, "postTests() partD successful: " + result.wasSuccessful());
+
+                if(result.wasSuccessful()) {
+                    mTestsSuccessful++;
+                    updateView();
+                } else {
+                    testFailed();
+                }
+            }
+        });
     }
 
     // THIS SECTION IS TO DEFINE OBSERVABLES USED IN THE SETUP AND TEARDOWN SECTIONS
 
-    // Creates a fake vendor for testing
+    // Creates a vendor for testing
     private static Observable<Boolean> createTestVendor() {
         return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
@@ -330,7 +396,7 @@ public class TestsActivity extends AppCompatActivity {
     }
 
 
-    // Creates a fake loyalty offer for testing with
+    // Creates a loyalty offer for testing with
     private static Observable<Boolean> createTestOffer() {
         return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
@@ -433,6 +499,53 @@ public class TestsActivity extends AppCompatActivity {
 
                 e.onNext(Boolean.TRUE);
                 e.onComplete();
+            }
+        });
+    }
+
+    // Creates a promotion for testing with
+    private static Observable<Boolean> createTestPromotion() {
+        return Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(@NonNull final ObservableEmitter<Boolean> e) throws Exception {
+                Promotion newPromotion = new Promotion("promo", "promo", "promo", "promo", "promo");
+                DatabaseReference ref = mTestsReference.child("Promotions");
+                ref.child("TestKey").setValue(newPromotion, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError != null) {
+                            // fails if database error
+                            e.onNext(Boolean.FALSE);
+                            e.onComplete();
+                        } else {
+                            e.onNext(Boolean.TRUE);
+                            e.onComplete();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // Removes test promotion
+    private static Observable<Boolean> removeTestPromotion() {
+        return Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(@NonNull final ObservableEmitter<Boolean> e) throws Exception {
+                DatabaseReference ref = mTestsReference.child("Promotions");
+                ref.child("TestKey").removeValue(new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError != null) {
+                            // fails if database error
+                            e.onNext(Boolean.FALSE);
+                            e.onComplete();
+                        } else {
+                            e.onNext(Boolean.TRUE);
+                            e.onComplete();
+                        }
+                    }
+                });
             }
         });
     }
