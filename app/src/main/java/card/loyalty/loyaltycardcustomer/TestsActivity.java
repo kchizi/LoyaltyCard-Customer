@@ -1,23 +1,33 @@
 package card.loyalty.loyaltycardcustomer;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
+
+import java.io.File;
+import java.io.IOException;
 
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
 import card.loyalty.loyaltycardcustomer.data_models.Vendor;
 import card.loyalty.loyaltycardcustomer.observables.RxFirebase;
 import card.loyalty.loyaltycardcustomer.tests.TestA;
 import card.loyalty.loyaltycardcustomer.tests.TestB;
+import card.loyalty.loyaltycardcustomer.tests.TestC;
 import card.loyalty.loyaltycardcustomer.tests.TestLoyatlyOffer;
 import card.loyalty.loyaltycardcustomer.tests.TestVendor;
 import io.reactivex.Observable;
@@ -31,11 +41,12 @@ public class TestsActivity extends AppCompatActivity {
 
     private static FirebaseAuth mAuth;
     private static DatabaseReference mTestsReference;
+    private static StorageReference mStorageReference;
 
     // Total number of tests including setup tests and teardown tests
-    private static final int NUMBER_OF_TESTS = 6;
-    private static final int NUMBER_OF_SETUP_TESTS = 2;
-    private static final int NUMBER_OF_TEARDOWN_TESTS = 2;
+    private static final int NUMBER_OF_TESTS = 8;
+    private static final int NUMBER_OF_SETUP_TESTS = 3;
+    private static final int NUMBER_OF_TEARDOWN_TESTS = 3;
 
     // Total number of successful tests so far
     private static int mTestsSuccessful;
@@ -49,8 +60,11 @@ public class TestsActivity extends AppCompatActivity {
 
     public static Boolean mTestA_Passed;
     public static Boolean mTestB_Passed;
+    public static Boolean mTestC_Passed;
     public static LoyaltyOffer mOfferReturned;
     public static Vendor mVendorReturned;
+    public static File mUploadContent;
+    public static File mDownloadContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +75,7 @@ public class TestsActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mTestsReference = FirebaseDatabase.getInstance().getReference().child("Tests");
+        mStorageReference = FirebaseStorage.getInstance().getReference().child("Tests");
 
         updateView();
 
@@ -183,7 +198,28 @@ public class TestsActivity extends AppCompatActivity {
                 }
             }
         });
-    }
+        // Tests that a file was uploaded to storage
+        uploadTestStorage().subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(@NonNull Boolean aBoolean) throws Exception {
+                mTestC_Passed = aBoolean;
+                JUnitCore core = new JUnitCore();
+                Result result = core.run(TestC.class);
+                Log.d(TAG, "preTests() partC successful: " + result.wasSuccessful());
+
+                if(result.wasSuccessful()) {
+                    mTestsSuccessful++;
+                    updateView();
+
+                    mSetupTestsDone++;
+                    if (mSetupTestsDone == NUMBER_OF_SETUP_TESTS) tests();
+                }else{
+                    testFailed();
+                }
+            }
+        });
+
+}
 
     /**
      * Tests to be conducted after the main tests
@@ -221,6 +257,24 @@ public class TestsActivity extends AppCompatActivity {
                     mTestsSuccessful++;
                     updateView();
                 } else {
+                    testFailed();
+                }
+            }
+        });
+        // Tests that a file was retrieved from storage
+        downloadTestStorage().subscribe(new Consumer<Boolean>() {
+            @Override
+            public void accept(@NonNull Boolean aBoolean) throws Exception {
+                mTestC_Passed = aBoolean;
+                JUnitCore core = new JUnitCore();
+                Result result = core.run(TestC.class);
+                Log.d(TAG, "postTests() partC successful: " + result.wasSuccessful());
+
+                if(result.wasSuccessful()) {
+                    mTestsSuccessful++;
+                    updateView();
+
+                }else{
                     testFailed();
                 }
             }
@@ -319,6 +373,66 @@ public class TestsActivity extends AppCompatActivity {
                         }
                     }
                 });
+            }
+        });
+    }
+
+    // Creates a temporary file that is uploaded to storage
+    private static Observable<Boolean> uploadTestStorage(){
+        return Observable.create(new ObservableOnSubscribe<Boolean> () {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
+
+                File uploadFile = File.createTempFile("Test", ".tmp");
+                mUploadContent = uploadFile;
+                Log.d(TAG, "uploadFile content: " + mUploadContent);
+
+                e.onNext(Boolean.TRUE);
+                e.onComplete();
+
+                UploadTask uploadTask = mStorageReference.child("Test").putFile(Uri.fromFile(uploadFile));
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+
+                    }
+                });
+            }
+        });
+    }
+
+    // Downloads the uploaded file from storage and deletes it
+    private static Observable<Boolean> downloadTestStorage(){
+
+        return Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Boolean> e) throws Exception {
+
+                mStorageReference.child("Test").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+                   @Override
+                    public void onSuccess(Uri uri) {
+                        try {
+                            File downloadFile = File.createTempFile("returnFile", "test");
+                            mDownloadContent = downloadFile;
+                            Log.d(TAG, "downloadFile content: "+mDownloadContent);
+                            mStorageReference.child("Test").delete();
+
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+
+                        }
+                    }
+                });
+
+                e.onNext(Boolean.TRUE);
+                e.onComplete();
             }
         });
     }
