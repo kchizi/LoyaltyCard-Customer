@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -157,6 +158,9 @@ public class CardDetailsFragment extends Fragment {
 
         Activity activity = getActivity();
 
+        ProgressBar spinner = (ProgressBar) activity.findViewById(R.id.detail_spinner);
+
+
         TextView businessName = (TextView) activity.findViewById(R.id.detail_bizName);
         TextView businessAddress = (TextView) activity.findViewById(R.id.detail_bizAddr);
         TextView offerDescription = (TextView) activity.findViewById(R.id.detail_offerDesc);
@@ -168,6 +172,8 @@ public class CardDetailsFragment extends Fragment {
         TextView rewardsClaimed = (TextView) activity.findViewById(R.id.detail_rewardsClaimed);
         final ImageView imageView = (ImageView) activity.findViewById(R.id.imageView);
         final ImageView imageView2 = (ImageView) activity.findViewById(R.id.product_image);
+
+        spinner.setVisibility(View.VISIBLE);
 
         mStorage.child("Images/" +card.offerID.toString()+ "/" +card.vendorID.toString()+ "/").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
@@ -195,6 +201,7 @@ public class CardDetailsFragment extends Fragment {
         rewardsIssued.setText("Rewards Issued: " + (pc / ppr));
         rewardsClaimed.setText("TODO");
 
+        spinner.setVisibility(View.GONE);
 
         // TODO fix up the logic that calculates purchases to next reward so that it gets the number from the database
 
