@@ -190,7 +190,7 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
         // Create an observable stream from the cards retrieved
         Observable.fromIterable(cards) //TODO check valid
                 .observeOn(Schedulers.io())
-                .concatMap(new Function<LoyaltyCard, ObservableSource<?>>() {
+                .flatMap(new Function<LoyaltyCard, ObservableSource<?>>() {
                     @Override
                     public ObservableSource<?> apply(@io.reactivex.annotations.NonNull LoyaltyCard loyaltyCard) throws Exception {
                         // create two new streams to get the vendor and offer
@@ -231,7 +231,7 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
                     @Override
                     public void run() throws Exception {
                         // set the cards to the recycler adapter
-                        mCards = cards;  // TODO check valid
+                        mCards = cards;
                         mRecyclerAdapter.setCards(mCards);
                         spinner.setVisibility(View.GONE);
                     }

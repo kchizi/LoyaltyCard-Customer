@@ -50,7 +50,7 @@ public class PromotionsRecyclerAdapter extends RecyclerView.Adapter<PromotionsRe
             holder.promoVendorName.setText("");
             holder.promoVendorAddress.setText("");
         }
-        holder.promoExpiry.setText(promotion.expiryDate);
+        holder.promoExpiry.setText("Expires " + promotion.expiryDate);
     }
 
     @Override

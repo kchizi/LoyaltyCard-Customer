@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,14 +22,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import card.loyalty.loyaltycardcustomer.R;
 import card.loyalty.loyaltycardcustomer.adapters.PromotionsRecyclerAdapter;
-import card.loyalty.loyaltycardcustomer.data_models.LoyaltyCard;
-import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
 import card.loyalty.loyaltycardcustomer.data_models.Promotion;
 import card.loyalty.loyaltycardcustomer.data_models.Vendor;
 import card.loyalty.loyaltycardcustomer.data_models.Voucher;
@@ -65,6 +68,8 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
     private DatabaseReference mPromotionsRef;
     private ValueEventListener mValueEventListener;
     private Query mQuery;
+
+    private ChildEventListener mChildEventListener;
 
     private List<Promotion> mPromotions;
 
@@ -131,7 +136,7 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
     }
 
     private void onSignedOutCleanup() {
-        detachDatabaseReadListener();
+        detachDatabaseListener();
     }
 
     // Attaches the database listener to trigger callback when Firebase data changes
@@ -151,7 +156,7 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
                         for (DataSnapshot cardSnapshot : dataSnapshot.getChildren()) {
                             Voucher voucher = cardSnapshot.getValue(Voucher.class);
                             Log.d(TAG, "onDataChange: voucher promoID: "+voucher.promoID);
-                            vouchers.add(0, voucher);
+                            vouchers.add(voucher);
                         }
 
                         populateRecycler(vouchers);
@@ -167,8 +172,47 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
         mQuery.addValueEventListener(mValueEventListener);
     }
 
+    private boolean promoIsExpired(Promotion promotion) {
+        try {
+            return dateHasPassed(promotion.expiryDate);
+        } catch (ParseException e) {
+            Log.d(TAG, "cardIsExpired: exception caught, " + e.getMessage());
+            return true;
+        }
+    }
+
+    /**
+     *
+     * @param date that may have passed
+     * @return true if date has passed
+     * @throws ParseException if the string cannot be parsed into date
+     */
+    public static boolean dateHasPassed(String date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date strDate = sdf.parse(date);
+        Date today = removeTime(new Date());
+        if (strDate.before(today)) {
+            return true;
+        } else return false;
+    }
+
+    /**
+     * Method to remove the time component of the date (this is so it can be compared wth a date with no time component)
+     * @param date a date to remove the time component from
+     * @return the date with time component set to 00:00:00
+     */
+    public static Date removeTime(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
+
     // Detaches the database listener
-    private void detachDatabaseReadListener() {
+    private void detachDatabaseListener() {
         if (mValueEventListener != null) {
             mQuery.removeEventListener(mValueEventListener);
             mValueEventListener = null;
@@ -179,13 +223,13 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
         final ArrayList<Promotion> promotions = new ArrayList<>();
         Observable.fromIterable(vouchers) //TODO check valid
                 .observeOn(Schedulers.io())
-                .concatMap(new Function<Voucher, ObservableSource<?>>() {
+                .flatMap(new Function<Voucher, ObservableSource<?>>() {
                     @Override
                     public ObservableSource<?> apply(@io.reactivex.annotations.NonNull Voucher voucher) throws Exception {
                         // create two new streams to get the vendor and offer
                         Observable<Vendor> ven = RxFirebase.getVendor(mRootRef, voucher.vendorID);
                         Observable<Promotion> promo = RxFirebase.getPromotion(mRootRef, voucher.promoID);
-                        Observable<Promotion> promoB = RxFirebase.getPromotion(mRootRef, voucher.promoID);
+                        Observable<Promotion> promoB = Observable.just(new Promotion("", "", "", "", ""));
 
                         // No Function2 available?!!! Using Function3 with duplicate promo
                         Function3<Vendor, Promotion, Promotion, Promotion> f = new Function3<Vendor, Promotion, Promotion, Promotion>() {
@@ -210,16 +254,16 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
                 .doOnNext(new Consumer<Object>() {
                     @Override
                     public void accept(@io.reactivex.annotations.NonNull Object promotion) throws Exception {
-                        if (!((Promotion) promotion).title.equals("")) {
-                            promotions.add((Promotion) promotion);
+                        Promotion promo = (Promotion) promotion;
+                        if (!promo.title.equals("") && !promoIsExpired(promo)) {
+                            promotions.add(0, (Promotion) promotion);
                         }
                     }
                 })
                 .doOnComplete(new Action() {
                     @Override
                     public void run() throws Exception {
-                        // set the cards to the recycler adapter
-                        mPromotions = promotions;  // TODO check valid
+                        mPromotions = promotions;
                         mRecyclerAdapter.setPromotions(mPromotions);
                     }
                 })
@@ -247,4 +291,93 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
         // Remove the firebase auth state listener
         mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
     }
+
+
+//     ALTERNATIVE APPROACH TO OBSERVABLES
+
+//    private void attachDatabaseChildListener() {
+//        mQuery = mVouchersRef.orderByChild("customerID").equalTo(mFirebaseAuth.getCurrentUser().getUid());
+//
+//        if (mChildEventListener == null) {
+//            mPromotions.clear();
+//            mChildEventListener = new ChildEventListener() {
+//
+//                @Override
+//                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+//                    Voucher voucher = dataSnapshot.getValue(Voucher.class);
+//                    processVoucher(voucher);
+//                }
+//
+//                @Override
+//                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+//
+//                }
+//
+//                @Override
+//                public void onChildRemoved(DataSnapshot dataSnapshot) {
+//
+//                }
+//
+//                @Override
+//                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+//
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            };
+//        }
+//        mQuery.addChildEventListener(mChildEventListener);
+//    }
+//
+//
+//    private void processVoucher(Voucher voucher) {
+//        Observable<Vendor> ven = RxFirebase.getVendor(mRootRef, voucher.vendorID);
+//        Observable<Promotion> promo = RxFirebase.getPromotion(mRootRef, voucher.promoID);
+//        Observable<Promotion> promoB = Observable.just(new Promotion("", "", "", "", ""));
+//
+//        // No Function2 available?!!! Using Function3 with duplicate promo
+//        Function3<Vendor, Promotion, Promotion, Promotion> f = new Function3<Vendor, Promotion, Promotion, Promotion>() {
+//            @Override
+//            public Promotion apply(@io.reactivex.annotations.NonNull Vendor vendor, @io.reactivex.annotations.NonNull Promotion promo, @io.reactivex.annotations.NonNull Promotion promoB) throws Exception {
+//                promo.setVendor(vendor);
+//                return promo;
+//            }
+//        };
+//        // zip the two observable streams together and returns a new observable
+//        Observable<Promotion> observable = Observable.zip(ven, promo, promoB, f);
+//
+//        observable.observeOn(Schedulers.io())
+//                .retry(3)
+//                .doOnError(new Consumer<Throwable>() {
+//                    @Override
+//                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
+//                        Log.d(TAG, "PromotionsFragment: Observable from iterable: " + throwable.getMessage());
+//                    }
+//                }).onErrorReturnItem(new Promotion("","","","",""))
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .doOnNext(new Consumer<Object>() {
+//                    @Override
+//                    public void accept(@io.reactivex.annotations.NonNull Object promotion) throws Exception {
+//                        Promotion promo = (Promotion) promotion;
+//                        if (!promo.title.equals("") && !promoIsExpired(promo)) {
+//                            mPromotions.add((Promotion) promotion);
+//                        }
+//                        mRecyclerAdapter.setPromotions(mPromotions);
+//                    }
+//                })
+//                .doOnComplete(new Action() {
+//                    @Override
+//                    public void run() throws Exception {
+//                    }
+//                })
+//                .subscribe();
+//
+//    }
 }
+
+
+
+
