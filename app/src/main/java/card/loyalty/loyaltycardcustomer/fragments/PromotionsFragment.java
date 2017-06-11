@@ -83,7 +83,6 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
 
         // Initialise cards list
         mPromotions = new ArrayList<>();
-        mPromotions.add(new Promotion("1", "2", "3", "4", "5"));
     }
 
     @Nullable
@@ -148,18 +147,12 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
 
                         // Create new array list so the cards displayed don't change until all data available
                         final ArrayList<Voucher> vouchers = new ArrayList<>();
-                        //mCards.clear();
 
                         for (DataSnapshot cardSnapshot : dataSnapshot.getChildren()) {
                             Voucher voucher = cardSnapshot.getValue(Voucher.class);
                             Log.d(TAG, "onDataChange: voucher promoID: "+voucher.promoID);
-                            vouchers.add(voucher);
+                            vouchers.add(0, voucher);
                         }
-
-//                        for (Voucher voucher: vouchers) {
-//                            mPromotions.add(new Promotion("1", "2", "3", "4", "5"));
-//                            mRecyclerAdapter.setPromotions(mPromotions);
-//                        }
 
                         populateRecycler(vouchers);
                     }
@@ -212,12 +205,14 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
                     public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
                         Log.d(TAG, "PromotionsFragment: Observable from iterable: " + throwable.getMessage());
                     }
-                }).onErrorReturnItem(new Promotion("_","_","_","_","_"))
+                }).onErrorReturnItem(new Promotion("","","","",""))
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(new Consumer<Object>() {
                     @Override
                     public void accept(@io.reactivex.annotations.NonNull Object promotion) throws Exception {
-                        promotions.add((Promotion) promotion);
+                        if (!((Promotion) promotion).title.equals("")) {
+                            promotions.add((Promotion) promotion);
+                        }
                     }
                 })
                 .doOnComplete(new Action() {

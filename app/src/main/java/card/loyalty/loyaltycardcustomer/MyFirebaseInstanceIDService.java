@@ -45,7 +45,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         // TODO: Implement send token to app server.
 
         final RequestQueue queue = Volley.newRequestQueue(this);
-        final String URL = "https://us-central1-loyaltycard-48904.cloudfunctions.net/register";
+        final String URL = CONFIG.REGISTER_CLOUD_FUNCTION;
 
         // Post params to be sent to the server
         HashMap<String, String> params = new HashMap<String, String>();

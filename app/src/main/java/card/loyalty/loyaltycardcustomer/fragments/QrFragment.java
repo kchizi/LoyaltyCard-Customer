@@ -21,8 +21,11 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -36,6 +39,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import card.loyalty.loyaltycardcustomer.CONFIG;
 import card.loyalty.loyaltycardcustomer.MyFirebaseInstanceIDService;
 import card.loyalty.loyaltycardcustomer.R;
 
@@ -186,26 +190,31 @@ public class QrFragment extends Fragment{
     private void onTokenRefresh() {
         Log.d(TAG, "onTokenRefresh: start");
         // Get updated InstanceID token.
-        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+        final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
-        sendRegistrationToServer(refreshedToken);
+        mFirebaseAuth.getCurrentUser().getToken(false).addOnCompleteListener(getActivity(), new OnCompleteListener<GetTokenResult>() {
+            @Override
+            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                GetTokenResult result = task.getResult();
+                sendRegistrationToServer(refreshedToken, result.getToken());
+            }
+        });
+
         Log.d(TAG, "onTokenRefresh: end");
     }
 
-    private void sendRegistrationToServer(String token) {
+    private void sendRegistrationToServer(String token, String idToken) {
         Log.d(TAG, "sendRegistrationToServer: start");
         // TODO: Implement send token to app server.
 
         final RequestQueue queue = Volley.newRequestQueue(getContext());
-        final String URL = "https://us-central1-loyaltycard-48904.cloudfunctions.net/register";
+        final String URL = CONFIG.REGISTER_CLOUD_FUNCTION;
 
         // Post params to be sent to the server
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("token", token);
+        params.put("auth", idToken);
 
         // Add the userID if exists
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
