@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -69,6 +70,9 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
     private ValueEventListener mValueEventListener;
     private Query mQuery;
 
+    // ProgressBar
+    private ProgressBar spinner;
+
     private ChildEventListener mChildEventListener;
 
     private List<Promotion> mPromotions;
@@ -106,6 +110,9 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
         // create recycler adapter and set as adapter for cards recycler
         mRecyclerAdapter = new PromotionsRecyclerAdapter(mPromotions);
         recyclerView.setAdapter(mRecyclerAdapter);
+
+        spinner = (ProgressBar)view.findViewById(R.id.card_spinner);
+        spinner.setVisibility(View.VISIBLE);
 
         // Firebase Auth confirmation
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -265,9 +272,12 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
                     public void run() throws Exception {
                         mPromotions = promotions;
                         mRecyclerAdapter.setPromotions(mPromotions);
+                        spinner.setVisibility(View.GONE);
+
                     }
                 })
                 .subscribe();
+            spinner.setVisibility(View.GONE);
     }
 
 

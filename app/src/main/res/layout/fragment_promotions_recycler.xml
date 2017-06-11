@@ -18,4 +18,21 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="8dp" />
+
+    <ProgressBar
+        android:id="@+id/card_spinner"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        style="@android:style/Widget.ProgressBar.Small"
+        android:indeterminateDrawable="@drawable/custom_indeterminate"
+        android:startColor="#007A00"
+        android:indeterminate="false"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        />
+
 </android.support.constraint.ConstraintLayout>
