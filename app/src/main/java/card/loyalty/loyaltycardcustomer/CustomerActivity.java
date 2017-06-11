@@ -25,6 +25,7 @@ import card.loyalty.loyaltycardcustomer.adapters.PromotionsRecyclerAdapter;
 import card.loyalty.loyaltycardcustomer.fragments.CardsRecyclerFragment;
 import card.loyalty.loyaltycardcustomer.fragments.PromotionsFragment;
 import card.loyalty.loyaltycardcustomer.fragments.QrFragment;
+import card.loyalty.loyaltycardcustomer.fragments.RewardsRecyclerFragment;
 
 public class CustomerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -171,7 +172,16 @@ public class CustomerActivity extends AppCompatActivity
                 current = new CardsRecyclerFragment();
             }
 
-        } else if (id == R.id.nav_promotions) {
+        } else if (id == R.id.nav_rewards) {
+
+            // check if fragment exists already
+            tag = RewardsRecyclerFragment.FRAGMENT_TAG;
+            current = manager.findFragmentByTag(tag);
+            if (current == null) {
+                // create if doesn't exist
+                current = new RewardsRecyclerFragment();
+            }
+        }else if (id == R.id.nav_promotions) {
 
             tag = PromotionsFragment.FRAGMENT_TAG;
             current = manager.findFragmentByTag(tag);
