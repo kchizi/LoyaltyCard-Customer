@@ -20,11 +20,11 @@
             android:title="Sign Out"/>
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Developer">
         <menu>
             <item
                 android:id="@+id/nav_test"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/ic_menu_manage"
                 android:title="Test" />
         </menu>
     </item>

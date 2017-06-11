@@ -198,13 +198,9 @@ public class CardDetailsFragment extends Fragment {
         int pc = Integer.parseInt(card.purchaseCount);
         int ptnr = ppr - pc % ppr;
         purchasesToNextReward.setText("Purchases to Next Reward: " + ptnr);
-        rewardsIssued.setText("Rewards Issued: " + (pc / ppr));
-        rewardsClaimed.setText("TODO");
+        rewardsIssued.setText("Rewards Issued: " + card.rewardsIssued);
+        rewardsClaimed.setText("Rewards Claimed: " + card.rewardsClaimed);
 
         spinner.setVisibility(View.GONE);
-
-        // TODO fix up the logic that calculates purchases to next reward so that it gets the number from the database
-
     }
-
 }

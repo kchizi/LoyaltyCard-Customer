@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="card.loyalty.loyaltycardcustomer.CustomerLandingActivity">
+    tools:context="card.loyalty.loyaltycardcustomer.CustomerActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
