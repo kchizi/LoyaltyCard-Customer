@@ -167,8 +167,6 @@ public class CardDetailsFragment extends Fragment {
         TextView reward = (TextView) activity.findViewById(R.id.detail_reward);
         TextView purchaseCount = (TextView) activity.findViewById(R.id.detail_purchCount);
         TextView purchasesToNextReward = (TextView) activity.findViewById(R.id.detail_purchToNext);
-        TextView rewardsIssued = (TextView) activity.findViewById(R.id.detail_rewardsIssued);
-        TextView rewardsClaimed = (TextView) activity.findViewById(R.id.detail_rewardsClaimed);
         final ImageView imageView = (ImageView) activity.findViewById(R.id.imageView);
         final ImageView imageView2 = (ImageView) activity.findViewById(R.id.product_image);
 
@@ -192,13 +190,11 @@ public class CardDetailsFragment extends Fragment {
         offerDescription.setText(card.retrieveOffer().description);
         purchasesPerReward.setText("Purchases Per Reward: " + card.retrieveOffer().purchasesPerReward);
         reward.setText("Reward: " + card.retrieveOffer().reward);
-        purchaseCount.setText("Purchase Count: " + card.purchaseCount);
+        purchaseCount.setText("Purchases Count: " + card.purchaseCount);
         int ppr = Integer.parseInt(card.retrieveOffer().purchasesPerReward);
         int pc = Integer.parseInt(card.purchaseCount);
         int ptnr = ppr - pc % ppr;
         purchasesToNextReward.setText("Purchases to Next Reward: " + ptnr);
-        rewardsIssued.setText("Rewards Issued: " + card.rewardsIssued);
-        rewardsClaimed.setText("Rewards Claimed: " + card.rewardsClaimed);
 
         spinner.setVisibility(View.GONE);
     }
