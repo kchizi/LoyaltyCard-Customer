@@ -105,7 +105,7 @@ public class QrFragment extends Fragment{
                                     .createSignInIntentBuilder()
                                     .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                                    //.setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
+                                    .setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
                                     .build(),
                             RC_SIGN_IN);
                 }
