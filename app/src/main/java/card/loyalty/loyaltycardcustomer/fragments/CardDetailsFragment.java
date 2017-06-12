@@ -155,7 +155,6 @@ public class CardDetailsFragment extends Fragment {
 
 
     private void fillCardDetails(LoyaltyCard card) {
-
         Activity activity = getActivity();
 
         ProgressBar spinner = (ProgressBar) activity.findViewById(R.id.detail_spinner);

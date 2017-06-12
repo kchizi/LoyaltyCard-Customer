@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.ContextCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -35,7 +36,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // TODO use loyalty card icon
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_menu_share)
+                        .setSmallIcon(R.drawable.loyaltycardicon)
+                        .setColor(ContextCompat.getColor(getBaseContext(), R.color.accent))
                         .setContentTitle(remoteMessage.getNotification().getTitle())
                         .setContentText(remoteMessage.getNotification().getBody());
 
