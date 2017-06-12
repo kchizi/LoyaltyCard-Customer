@@ -125,7 +125,7 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
                                     .createSignInIntentBuilder()
                                     .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                                    //.setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
+                                    .setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
                                     .build(),
                             RC_SIGN_IN);
                 }
@@ -140,6 +140,8 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
     }
 
     private void onSignedOutCleanup() {
+        mCards.clear();
+        mRecyclerAdapter.setCards(mCards);
         detachDatabaseReadListener();
     }
 
@@ -166,6 +168,8 @@ public class CardsRecyclerFragment extends Fragment implements CardsRecyclerClic
 
 
                         populateRecycler(cards);
+                    } else {
+                        spinner.setVisibility(View.GONE);
                     }
                 }
 

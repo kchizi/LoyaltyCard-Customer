@@ -87,9 +87,6 @@ public class QrFragment extends Fragment{
         // Get image view for qr code
         mQrCodeView = (ImageView) view.findViewById(R.id.imgview_qr);
 
-        // Get image view for qr code
-        mQrCodeView = (ImageView) view.findViewById(R.id.imgview_qr);
-
         // Firebase UI Authentication
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -143,7 +140,7 @@ public class QrFragment extends Fragment{
     }
 
     private void onSignedOutCleanup() {
-        // TODO cleanup
+        // nothing at this stage, leaving it here because it will become useful most likely
     }
 
     // On resuming fragment

@@ -128,7 +128,7 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
                                     .createSignInIntentBuilder()
                                     .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
                                             new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                                    //.setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
+                                    .setTheme(R.style.AuthTheme) //set bizName theme for Firebase UI here
                                     .build(),
                             RC_SIGN_IN);
                 }
@@ -143,6 +143,8 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
     }
 
     private void onSignedOutCleanup() {
+        mPromotions.clear();
+        mRecyclerAdapter.setPromotions(mPromotions);
         detachDatabaseListener();
     }
 
@@ -167,6 +169,8 @@ public class PromotionsFragment extends Fragment implements CardsRecyclerClickLi
                         }
 
                         populateRecycler(vouchers);
+                    } else {
+                        spinner.setVisibility(View.GONE);
                     }
                 }
 
