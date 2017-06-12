@@ -42,7 +42,7 @@ public class LoyaltyRewardRecyclerAdapter extends RecyclerView.Adapter<LoyaltyRe
     public void onBindViewHolder(LoyaltyRewardViewHolder holder, int position) {
         LoyaltyReward reward = mRewards.get(position);
         holder.businessName.setText(reward.retrieveBusinessName());
-        holder.rewardDesc.setText(reward.retrieveReward());
+        holder.rewardDesc.setText(reward.rewardDesc);
     }
 
     @Override

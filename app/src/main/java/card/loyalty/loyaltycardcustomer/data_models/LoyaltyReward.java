@@ -9,8 +9,13 @@ public class LoyaltyReward {
     public String offerID;
     public String rewardDesc;
     public String vendorID;
+    public String cardID_customerID;
 
     public String rewardID;
+
+    public Vendor vendor;
+
+    public String businessName;
 
     public LoyaltyReward() {}
 
@@ -29,5 +34,19 @@ public class LoyaltyReward {
         this.rewardID = rewardID;
     }
 
+    public void setVendor(Vendor vendor) {
+        this.vendor = vendor;
+    }
+    public Vendor retrieveVendor() {
+        return vendor;
+    }
+
+    public String retrieveBusinessName() {
+        return businessName;
+    }
+
+    public void setBusinessName(String businessName) {
+        this.businessName = businessName;
+    }
 
 }

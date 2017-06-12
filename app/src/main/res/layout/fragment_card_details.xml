@@ -4,19 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="card.loyalty.loyaltycardcustomer.DetailedCardViewActivity">
+    tools:context="card.loyalty.loyaltycardcustomer.fragments.QrFragment">
 
     <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         app:cardCornerRadius="10dp"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -31,20 +32,20 @@
                 android:textSize="24sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="Business Name" />
+                tools:text="Business Name"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_bizAddr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
                 app:layout_constraintHorizontal_bias="0.05"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/imageView2"
                 app:layout_constraintTop_toBottomOf="@+id/detail_bizName"
-                tools:text="Business Address" />
+                tools:text="Business Address"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_offerDesc"
@@ -55,7 +56,8 @@
                 android:textSize="18sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/detail_bizAddr"
-                tools:text="Offer Description" />
+                tools:text="Offer Description"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_ppr"
@@ -65,7 +67,8 @@
                 android:layout_marginTop="24dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/detail_offerDesc"
-                tools:text="Purchases Per Reward" />
+                tools:text="Purchases Per Reward"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_reward"
@@ -75,7 +78,8 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/detail_ppr"
-                tools:text="Reward" />
+                tools:text="Reward"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_purchCount"
@@ -85,7 +89,8 @@
                 android:layout_marginTop="24dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/detail_reward"
-                tools:text="Purchase Count" />
+                tools:text="Purchase Count"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_rewardsIssued"
@@ -95,7 +100,8 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/detail_purchToNext"
-                tools:text="Rewards Issued" />
+                tools:text="Rewards Issued"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_rewardsClaimed"
@@ -107,7 +113,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/detail_rewardsIssued"
-                tools:text="Rewards Claimed" />
+                tools:text="Rewards Claimed"
+                android:layout_marginStart="8dp" />
 
             <TextView
                 android:id="@+id/detail_purchToNext"
@@ -117,21 +124,22 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/detail_purchCount"
-                tools:text="Purchases To Next Reward" />
+                tools:text="Purchases To Next Reward"
+                android:layout_marginStart="8dp" />
 
 
             <ImageView
                 android:id="@+id/product_image"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:layout_marginLeft="0dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
                 android:scaleType="fitEnd"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintLeft_toRightOf="@+id/detail_bizName"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginEnd="8dp" />
 
             <ProgressBar
                 android:id="@+id/detail_spinner"
@@ -141,8 +149,6 @@
                 android:indeterminateDrawable="@drawable/custom_indeterminate"
                 android:startColor="#007A00"
                 android:indeterminate="false"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintVertical_bias="0.5"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"

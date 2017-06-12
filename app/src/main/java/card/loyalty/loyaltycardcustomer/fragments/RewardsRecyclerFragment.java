@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,10 +26,20 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import card.loyalty.loyaltycardcustomer.CustomerActivity;
 import card.loyalty.loyaltycardcustomer.R;
-import card.loyalty.loyaltycardcustomer.adapters.LoyaltyRewardsRecyclerAdapter;
+import card.loyalty.loyaltycardcustomer.adapters.LoyaltyRewardRecyclerAdapter;
+import card.loyalty.loyaltycardcustomer.data_models.LoyaltyOffer;
 import card.loyalty.loyaltycardcustomer.data_models.LoyaltyReward;
+import card.loyalty.loyaltycardcustomer.data_models.Vendor;
+import card.loyalty.loyaltycardcustomer.observables.RxFirebase;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Function3;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Caleb T on 12/06/2017.
@@ -59,7 +70,7 @@ public class RewardsRecyclerFragment extends Fragment implements RewardsRecycler
 
     // RecyclerView Objects
     protected RecyclerView recyclerView;
-    protected LoyaltyRewardsRecyclerAdapter recyclerAdapter;
+    protected LoyaltyRewardRecyclerAdapter recyclerAdapter;
     protected RecyclerView.LayoutManager layoutManager;
 
     // List of Offers created
@@ -95,7 +106,7 @@ public class RewardsRecyclerFragment extends Fragment implements RewardsRecycler
         recyclerView.addOnItemTouchListener(new RewardsRecyclerClickListener(getContext(), recyclerView, this));
 
         // Creates recyclerAdapter for content
-        recyclerAdapter = new LoyaltyRewardsRecyclerAdapter(mRewards);
+        recyclerAdapter = new LoyaltyRewardRecyclerAdapter(mRewards);
         recyclerView.setAdapter(recyclerAdapter);
 
         spinner = (ProgressBar)view.findViewById(R.id.card_spinner);
@@ -150,15 +161,15 @@ public class RewardsRecyclerFragment extends Fragment implements RewardsRecycler
                     Log.d(TAG, "onDataChange started");
                     if (dataSnapshot.exists()) {
                         Log.d(TAG, "onDataChange: data change detected");
-                        mRewards.clear();
+
+                        final ArrayList<LoyaltyReward> rewards = new ArrayList<>();
+
                         for (DataSnapshot rewardSnapshot : dataSnapshot.getChildren()) {
                             LoyaltyReward reward = rewardSnapshot.getValue(LoyaltyReward.class);
                             reward.setRewardID(rewardSnapshot.getKey());
-                            mRewards.add(reward);
-                            Log.d(TAG, "Current reward description: " + reward.rewardDesc);
+                            rewards.add(reward);
                         }
-                        recyclerAdapter.setOffers(mRewards);
-                        spinner.setVisibility(View.GONE);
+                        populateRewards(rewards);
                     } else {
                         // Removes
                         Log.d(TAG, "dataSnapshot doesn't exist");
@@ -186,10 +197,54 @@ public class RewardsRecyclerFragment extends Fragment implements RewardsRecycler
         }
     }
 
+    public void populateRewards(final ArrayList<LoyaltyReward> loyaltyRewards) {
+        Observable.fromIterable(loyaltyRewards)
+                .observeOn(Schedulers.io())
+                .flatMap(new Function<LoyaltyReward, ObservableSource<?>>() {
+                    @Override
+                    public ObservableSource<?> apply(@io.reactivex.annotations.NonNull LoyaltyReward loyaltyReward) throws Exception {
+                        Observable<Vendor> ven = RxFirebase.getVendor(mRootRef, loyaltyReward.vendorID);
+                        Observable<LoyaltyOffer> off = RxFirebase.getLoyaltyOffer(mRootRef, loyaltyReward.offerID);
+                        Observable<LoyaltyReward> reward = Observable.just(loyaltyReward);
+
+                        Function3<Vendor, LoyaltyOffer, LoyaltyReward, LoyaltyReward> f = new Function3<Vendor, LoyaltyOffer, LoyaltyReward, LoyaltyReward>() {
+                            @Override
+                            public LoyaltyReward apply(@io.reactivex.annotations.NonNull Vendor vendor, @io.reactivex.annotations.NonNull LoyaltyOffer loyaltyOffer, @io.reactivex.annotations.NonNull LoyaltyReward loyaltyReward) throws Exception {
+                                loyaltyReward.setBusinessName(vendor.businessName);
+                                return loyaltyReward;
+                            }
+                        };
+                        Observable<LoyaltyReward> observable = Observable.zip(ven, off, reward, f);
+                        return observable;
+                    }
+                }).retry(3)
+                .doOnError(new Consumer<Throwable>() {
+                    @Override
+                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
+                        Log.d(TAG, "Rewards Observable error");
+                    }
+                }).onErrorReturnItem(new LoyaltyReward())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        mRewards = loyaltyRewards;
+                        recyclerAdapter.setRewards(mRewards);
+                    }
+                })
+                .subscribe();
+        spinner.setVisibility(View.GONE);
+    }
+
     // launch the scanner on click
     @Override
     public void onClick(View view, int position) {
         Toast.makeText(getContext(), "Reward Pressed", Toast.LENGTH_SHORT).show();
+        FragmentManager manager = getFragmentManager();
+        manager.beginTransaction()
+                .replace(R.id.content, RewardDetailsFragment.newInstance(mRewards.get(position).getRewardID()))
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override

@@ -11,7 +11,7 @@
     <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/rewards_recycler"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
@@ -23,7 +23,8 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        tools:context="card.loyalty.loyaltycardcustomer.RewardRecyclerFragment" />
+        tools:context="card.loyalty.loyaltycardcustomer.RewardRecyclerFragment"
+        android:layout_marginEnd="8dp" />
 
     <ProgressBar
         android:id="@+id/card_spinner"
