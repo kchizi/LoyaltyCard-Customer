@@ -11,6 +11,10 @@
             android:icon="@drawable/cards1"
             android:title="MyCards"/>
         <item
+            android:id="@+id/nav_rewards"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Rewards"/>
+        <item
             android:id="@+id/nav_promotions"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Promotions"/>
@@ -18,6 +22,7 @@
             android:id="@+id/nav_signout"
             android:icon="@drawable/logout1"
             android:title="Sign Out"/>
+
     </group>
 
     <item android:title="Developer">
