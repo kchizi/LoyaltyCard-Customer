@@ -167,7 +167,7 @@ public class RewardsRecyclerFragment extends Fragment implements RewardsRecycler
                         for (DataSnapshot rewardSnapshot : dataSnapshot.getChildren()) {
                             LoyaltyReward reward = rewardSnapshot.getValue(LoyaltyReward.class);
                             reward.setRewardID(rewardSnapshot.getKey());
-                            rewards.add(reward);
+                            rewards.add(0, reward);
                         }
                         populateRewards(rewards);
                     } else {
@@ -239,7 +239,7 @@ public class RewardsRecyclerFragment extends Fragment implements RewardsRecycler
     // launch the scanner on click
     @Override
     public void onClick(View view, int position) {
-        Toast.makeText(getContext(), "Reward Pressed", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(), "Reward Pressed", Toast.LENGTH_SHORT).show();
         FragmentManager manager = getFragmentManager();
         manager.beginTransaction()
                 .replace(R.id.content, RewardDetailsFragment.newInstance(mRewards.get(position).getRewardID()))
@@ -249,6 +249,6 @@ public class RewardsRecyclerFragment extends Fragment implements RewardsRecycler
 
     @Override
     public void onLongClick(View view, int position) {
-        Toast.makeText(getContext(), "Reward Long Pressed", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(), "Reward Long Pressed", Toast.LENGTH_SHORT).show();
     }
 }

@@ -98,6 +98,8 @@ public class RewardDetailsFragment extends Fragment {
                     }
 
                     populateDetailView(reward);
+                } else {
+                    getActivity().getSupportFragmentManager().popBackStack();
                 }
             }
 
@@ -106,7 +108,7 @@ public class RewardDetailsFragment extends Fragment {
                 // TODO canncel method
             }
         };
-        query.addListenerForSingleValueEvent(listener);
+        query.addValueEventListener(listener);
 
         return view;
     }

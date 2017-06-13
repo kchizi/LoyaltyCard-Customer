@@ -19,5 +19,6 @@
         <item name="colorControlHighlight">@color/primary_light</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="android:navigationBarColor">@color/primary</item>
+        <item name="colorButtonNormal">@color/accent</item>
     </style>
 </resources>

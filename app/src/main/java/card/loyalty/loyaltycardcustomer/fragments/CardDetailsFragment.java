@@ -167,21 +167,22 @@ public class CardDetailsFragment extends Fragment {
         TextView reward = (TextView) activity.findViewById(R.id.detail_reward);
         TextView purchaseCount = (TextView) activity.findViewById(R.id.detail_purchCount);
         TextView purchasesToNextReward = (TextView) activity.findViewById(R.id.detail_purchToNext);
-        final ImageView imageView = (ImageView) activity.findViewById(R.id.imageView);
-        final ImageView imageView2 = (ImageView) activity.findViewById(R.id.product_image);
+        TextView rewardsIssued = (TextView) activity.findViewById(R.id.detail_rewardsIssued);
+//        TextView rewardsClaimed = (TextView) activity.findViewById(R.id.detail_rewardsClaimed);
+        final ImageView imageView = (ImageView) activity.findViewById(R.id.product_image);
 
         spinner.setVisibility(View.VISIBLE);
 
         mStorage.child("Images/" +card.offerID.toString()+ "/" +card.vendorID.toString()+ "/").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
-                Glide.with(getApplicationContext()).load(uri).override(100,100).error(R.drawable.placeholder).into(imageView2);
+                Glide.with(getApplicationContext()).load(uri).override(100,100).error(R.drawable.placeholder).into(imageView);
 
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
-                Glide.with(getApplicationContext()).load(R.drawable.placeholder).override(100,100).into(imageView2);
+                Glide.with(getApplicationContext()).load(R.drawable.placeholder).override(100,100).into(imageView);
             }
         });
 
@@ -195,6 +196,8 @@ public class CardDetailsFragment extends Fragment {
         int pc = Integer.parseInt(card.purchaseCount);
         int ptnr = ppr - pc % ppr;
         purchasesToNextReward.setText("Purchases to Next Reward: " + ptnr);
+        rewardsIssued.setText("Rewards Issued: " + card.rewardsIssued);
+//        rewardsClaimed.setText("Rewards Claimed: " + card.rewardsClaimed);
 
         spinner.setVisibility(View.GONE);
     }
