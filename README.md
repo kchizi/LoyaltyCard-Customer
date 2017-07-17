@@ -1,6 +1,6 @@
 ## LoyaltyCard Customer App
 
-**LoyaltyCard is a loyalty card replacement system for Android. It consists of a Android application for customers, and Android application for vendors, and a backend API deployed using firebase cloud functions. The system requires a firebase account.**
+**LoyaltyCard is a loyalty card system for Android. It consists of a Android application for customers, and Android application for vendors, and a backend API deployed using firebase cloud functions. The system requires a firebase account.**
 <br>
 <br>
 
